@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { IssueList } from './Issue'
 import { GroupedLabelFilterList } from './Label'
 import { MilestoneList } from './Milestone'
+import { IssueTypeList } from './IssueType'
 import { CollapsableHeader } from './Collapsable'
 
 const AssigneeList = (props) => {
@@ -28,6 +29,7 @@ class Page extends Component {
       requiredMilestone: undefined,
       requiredLabels: [],
       forbiddenLabels: [],
+      allowedIssueType: 'issue',
     };
   }
 
@@ -57,6 +59,8 @@ class Page extends Component {
 
     this.props.issues.forEach(issue => {
 
+      let isAllowedIssueType = (this.state.allowedIssueType === undefined || this.state.allowedIssueType === issue.issueType);
+
       let haveRequiredLabels = this.state.requiredLabels.length > 0;
       let requiredLabelsMatched = issue.labels.reduce((requiredLabelsMatched, current) => {
         if (this.state.requiredLabels.includes(current.id)) {
@@ -76,7 +80,8 @@ class Page extends Component {
 
       if ((forbiddenLabelsMatched == 0) && 
          (!haveRequiredLabels || requiredLabelsMatched) &&
-         (!this.state.requiredMilestone || milestonesMatched)) {
+         (!this.state.requiredMilestone || milestonesMatched) &&
+         isAllowedIssueType) {
         this.addById(issuesByAssignee, issue.assignee, issue);
       }
 
@@ -121,6 +126,13 @@ class Page extends Component {
       });
     }
 
+    const addToIssueTypeFilter = (issueType) => {
+      console.log(`IssueType '${issueType}'`);
+      this.setState({
+        allowedIssueType: (this.state.allowedIssueType === issueType) ? undefined : issueType,
+      });
+    }
+
     return (
       <>
         <CollapsableHeader header="Milestones" level={2}>
@@ -149,7 +161,14 @@ class Page extends Component {
             resetFilters={resetLabelFilters}
           />
         </CollapsableHeader>
-        <CollapsableHeader header="Issues" level={2}>
+        <CollapsableHeader header="Types" level={2}>
+          <IssueTypeList
+            allowedIssueType={this.state.allowedIssueType}
+            issueTypes={['issue', 'pull_request'] /* TODO: Share possible values with Query.js */}
+            addToFilter={addToIssueTypeFilter}
+          />
+        </CollapsableHeader>
+        <CollapsableHeader header="Results" level={2}>
           <AssigneeList
             issuesByAssignee={issuesByAssignee}
             requiredLabels={this.state.requiredLabels}/>

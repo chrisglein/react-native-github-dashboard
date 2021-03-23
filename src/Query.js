@@ -53,6 +53,7 @@ class GitHubQuery extends Component {
         url: value.url, // TODO: This should be the html url, not the api url
       };
     });
+    let issueType = (issue['pull_request'] !== undefined ? 'pull_request' : 'issue');
     return {
       id: issue.id,
       number: issue.number,
@@ -62,6 +63,7 @@ class GitHubQuery extends Component {
       url: issue.html_url,
       labels: labels,
       milestone: milestone,
+      issueType: issueType,
     };
   }
 
