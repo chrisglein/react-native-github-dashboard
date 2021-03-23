@@ -166,7 +166,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\node_modules\@react-native-community\async-storage\windows\ReactNativeAsyncStorage\ReactNativeAsyncStorage.vcxproj">
+    <ProjectReference Include="..\..\node_modules\@react-native-async-storage\async-storage\windows\ReactNativeAsyncStorage\ReactNativeAsyncStorage.vcxproj">
       <Project>{4855d892-e16c-404d-8286-0089e0f7f9c4}</Project>
     </ProjectReference>
   </ItemGroup>
