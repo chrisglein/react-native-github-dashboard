@@ -13,12 +13,12 @@
     "web-build": "./node_modules/.bin/webpack -p --config ./web/webpack.config.js"
   },
   "dependencies": {
-    "@react-native-community/async-storage": "^1.11.0",
+    "@react-native-async-storage/async-storage": "^1.11.0",
     "react": "16.13.1",
     "react-dom": "^16.13.1",
     "react-native": "0.63.2",
     "react-native-web": "^0.13.4",
-    "react-native-windows": "^0.63.0-0"
+    "react-native-windows": "^0.63.10"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",

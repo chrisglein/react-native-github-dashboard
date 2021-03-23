@@ -9,7 +9,7 @@ import { RepoUrls } from './RepoUrl'
 import { Page } from './Page'
 import { CollapsableHeader } from './Collapsable'
 
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {name as appName} from '../app.json';
 
