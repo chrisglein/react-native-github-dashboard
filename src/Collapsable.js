@@ -167,6 +167,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     borderBottomWidth: 2,
     borderColor: 'black',
+    backgroundColor: '#DDDDDD',
   }
 });
 

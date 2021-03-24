@@ -233,12 +233,10 @@ class Page extends Component {
             {this.props.settingsUI}
           </Header>
         }
-        <CollapsableHeader header="Results" level={2}>
-          <IssuessByAssigneeList
-            assignees={assigneesWithIssues}
-            issuesByAssignee={issuesByAssignee}
-            requiredLabels={this.state.requiredLabels}/>
-        </CollapsableHeader>
+        <IssuessByAssigneeList
+          assignees={assigneesWithIssues}
+          issuesByAssignee={issuesByAssignee}
+          requiredLabels={this.state.requiredLabels}/>
       </>
     );
   }
