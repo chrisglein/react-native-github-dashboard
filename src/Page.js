@@ -6,7 +6,7 @@ import { GroupedLabelFilterList } from './Label'
 import { MilestoneList } from './Milestone'
 import { IssueTypeList } from './IssueType'
 import { AssigneeList } from './Assignee'
-import { CollapsableHeader } from './Collapsable'
+import { CollapsableHeader, IndirectHeaders, Header } from './Collapsable'
 
 const IssuessByAssigneeList = (props) => {
   return props.assignees.map(assignee => (
@@ -27,6 +27,28 @@ class Page extends Component {
       requiredLabels: [],
       forbiddenLabels: [],
       allowedIssueType: 'issue',
+      headers: {
+        milestones: {
+          label: 'Milestones',
+          expanded: false,
+        },
+        labels: {
+          label: 'Labels',
+          expanded: false,
+        },
+        types: {
+          label: 'Types',
+          expanded: false,
+        },
+        assignees: {
+          label: 'Assignees',
+          expanded: false,
+        },
+        settings: {
+          label: 'Settings',
+          expanded: false,
+        },
+      },
     };
   }
 
@@ -160,33 +182,57 @@ class Page extends Component {
 
     return (
       <>
-        <CollapsableHeader header="Milestones" level={2}>
-          <MilestoneList
-            milestonesById={milestonesById}
-            required={this.state.requiredMilestone}
-            addToFilter={addToMilestoneFilter}/>
-        </CollapsableHeader>
-        <CollapsableHeader header="Labels" level={2} style={{backgroundColor: '#eeeeee'}}>
-          <GroupedLabelFilterList
-            labelsById={labelsById}
-            requiredLabels={this.state.requiredLabels}
-            forbiddenLabels={this.state.forbiddenLabels}
-            addToFilter={addToLabelFilter}
-            filterOut={filterOutLabel}
-            resetFilters={resetLabelFilters}/>
-        </CollapsableHeader>
-        <CollapsableHeader header="Types" level={2}>
-          <IssueTypeList
-            required={this.state.allowedIssueType}
-            issueTypes={['issue', 'pull_request'] /* TODO: Share possible values with Query.js */}
-            addToFilter={addToIssueTypeFilter}/>
-        </CollapsableHeader>
-        <CollapsableHeader header="Assignee" level={2}>
-          <AssigneeList
-            assignees={allAssignees}
-            required={this.state.requiredAssignee}
-            addToFilter={addToAssigneeFilter}/>
-        </CollapsableHeader>
+        <IndirectHeaders
+          headers={
+            Object.entries(this.state.headers).map(entry => {
+              return {...entry[1], ...{key: entry[0]}}
+            })
+          }
+          onExpandedChanged={(key, value) => {
+            let headers = this.state.headers;
+            headers[key].expanded = value;
+            this.setState({headers: headers});
+          }}/>
+        { (!this.state.headers.milestones.expanded) ? null :  
+          <Header header="Milestones" level={2}>
+            <MilestoneList
+              milestonesById={milestonesById}
+              required={this.state.requiredMilestone}
+              addToFilter={addToMilestoneFilter}/>
+          </Header>
+        }
+        { (!this.state.headers.labels.expanded) ? null :  
+          <Header header="Labels" level={2} style={{backgroundColor: '#eeeeee'}}>
+            <GroupedLabelFilterList
+              labelsById={labelsById}
+              requiredLabels={this.state.requiredLabels}
+              forbiddenLabels={this.state.forbiddenLabels}
+              addToFilter={addToLabelFilter}
+              filterOut={filterOutLabel}
+              resetFilters={resetLabelFilters}/>
+          </Header>
+        }
+        { (!this.state.headers.types.expanded) ? null :  
+          <Header header="Types" level={2}>
+            <IssueTypeList
+              required={this.state.allowedIssueType}
+              issueTypes={['issue', 'pull_request'] /* TODO: Share possible values with Query.js */}
+              addToFilter={addToIssueTypeFilter}/>
+          </Header>
+        }
+        { (!this.state.headers.assignees.expanded) ? null :  
+          <Header header="Assignees" level={2}>
+            <AssigneeList
+              assignees={allAssignees}
+              required={this.state.requiredAssignee}
+              addToFilter={addToAssigneeFilter}/>
+          </Header>
+        }
+        { (!this.state.headers.settings.expanded) ? null :  
+          <Header header="Settings" level={2}>
+            {this.props.settingsUI}
+          </Header>
+        }
         <CollapsableHeader header="Results" level={2}>
           <IssuessByAssigneeList
             assignees={assigneesWithIssues}
