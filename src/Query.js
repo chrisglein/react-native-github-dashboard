@@ -341,8 +341,10 @@ class GitHubQuery extends Component {
   render() {
     return (
       <>
-        <CollapsableHeader header='settings' level={2} expanded={false} style={{backgroundColor: '#eeeeee'}}>
-          <RepoUrls
+        <Page
+          issues={this.state.issues}
+          settingsUI={
+            <RepoUrls
             urls={this.state.repoUrls}
             clearCache={() => {
               this.clearCache();
@@ -352,8 +354,7 @@ class GitHubQuery extends Component {
                 repoUrls: urls,
               }, () => this.queryAllIssues());
             }}/>
-        </CollapsableHeader>
-        <Page issues={this.state.issues}/>
+          }/>
         {(this.state.progress < 1.0) &&
           <View style={styles.loading}>
             <ActivityIndicator size='large'/>
