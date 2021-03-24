@@ -13,7 +13,7 @@ const IssueType = (props) => {
       onPress={() => {
         props.onPress(props.issueType);
       }}>
-      <View style={props.isAllowedIssueType ? styles.requiredIssueType : styles.issueType}>
+      <View style={props.isRequired ? styles.required : styles.issueType}>
         <Text style={styles.issueTypeText}>{props.issueType}</Text>
       </View>
     </TouchableWithoutFeedback>
@@ -22,14 +22,17 @@ const IssueType = (props) => {
 
 const IssueTypeList = (props) => {
   return (
-    <View style={styles.issueTypeList}>
+    <View style={styles.list}>
       {props.issueTypes.map(issueType => {
+        let isRequired = props.required === undefined
+          ? true
+          : props.required === issueType;
         return (
           <View
             key={issueType}
-            style={styles.issueTypeListItem}>
+            style={styles.listItem}>
             <IssueType
-              isAllowedIssueType={props.allowedIssueType === issueType}
+              isRequired={isRequired}
               issueType={issueType}
               onPress={(issueType) => props.addToFilter(issueType)}
               />
@@ -41,15 +44,15 @@ const IssueTypeList = (props) => {
 }
 
 const styles = StyleSheet.create({
-  issueTypeList: {
+  list: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  issueTypeListItem: {
+  listItem: {
     marginRight: 4,
     marginBottom: 4,
   },
-  requiredIssueType: {
+  required: {
     backgroundColor: 'black',
     paddingLeft: 4,
     paddingRight: 4,
