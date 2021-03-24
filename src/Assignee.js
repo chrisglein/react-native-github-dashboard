@@ -6,37 +6,36 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 
-const Milestone = (props) => {
+const Assignee = (props) => {
   return (
     <TouchableWithoutFeedback
       accessibilityRole="button"
       onPress={() => {
-        props.onPress(props.milestone);
+        props.onPress(props.assignee);
       }}>
-      <View style={props.isRequired ? styles.required : styles.milestone}>
-        <Text style={styles.milestoneText}>{props.milestone.title}</Text>
+      <View style={props.isRequired ? styles.required : styles.assignee}>
+        <Text style={styles.assigneeText}>{props.assignee}</Text>
       </View>
     </TouchableWithoutFeedback>
   )
 }
 
-const MilestoneList = (props) => {
-  let milestones = Object.values(props.milestonesById).sort((a,b) => (a.dueDate - b.dueDate));
+const AssigneeList = (props) => {
   return (
     <View style={styles.list}>
-      {milestones.map(milestone => {
+      {props.assignees.map(assignee => {
         let isRequired = props.required === undefined
           ? true
-          : props.required === milestone.title;
+          : props.required === assignee;
         return (
           <View
-            key={milestone.title}
+            key={assignee}
             style={styles.listItem}>
-            <Milestone
-              milestone={milestone}
+            <Assignee
+              assignee={assignee}
               isRequired={isRequired}
-              onPress={(milestone) => {
-                props.addToFilter(milestone)
+              onPress={(assignee) => {
+                props.addToFilter(assignee)
               }}/>
             </View>
         )}
@@ -55,18 +54,20 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   required: {
-    backgroundColor: 'black',
+    borderColor: 'black',
+    borderWidth: 2,
     paddingLeft: 4,
     paddingRight: 4,
   },
-  milestone: {
-    backgroundColor: 'gray',
+  assignee: {
+    borderColor: '#CCCCCC',
+    borderWidth: 2,
     paddingLeft: 4,
     paddingRight: 4,
   },
-  milestoneText: {
-    color: 'white',
+  assigneeText: {
+    color: 'black',
   }
 });
 
-export { MilestoneList };
+export { AssigneeList };
