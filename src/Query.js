@@ -20,6 +20,8 @@ class GitHubQuery extends Component {
       repoUrls: [
         'microsoft/react-native-windows',
         'microsoft/react-native-windows-samples',
+        'microsoft/react-native-gallery',
+        'microsoft/react-native-dualscreen',
       ],
       issues: [],
     };
