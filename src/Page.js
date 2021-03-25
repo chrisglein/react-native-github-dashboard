@@ -22,11 +22,11 @@ class Page extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      requiredMilestone: undefined,
-      requiredAssignee: undefined,
+      requiredMilestone: props.queryParams.milestone,
+      requiredAssignee: props.queryParams.assignee,
       requiredLabels: [],
       forbiddenLabels: [],
-      allowedIssueType: 'issue',
+      allowedIssueType: props.queryParams.issueType ?? "issue",
       headers: {
         milestones: {
           label: 'Milestones',

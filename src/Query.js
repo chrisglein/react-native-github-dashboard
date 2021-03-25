@@ -343,6 +343,7 @@ class GitHubQuery extends Component {
       <>
         <Page
           issues={this.state.issues}
+          queryParams={this.props.queryParams}
           settingsUI={
             <RepoUrls
             urls={this.state.repoUrls}
