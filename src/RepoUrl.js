@@ -56,6 +56,7 @@ let RepoUrls = (props) => {
         <Button title='+' onPress={addUrl}/>
       </View>
       <Button title='reset cache' onPress={() => props.clearCache()}/>
+      <Button title='refresh' onPress={() => props.refreshQuery()}/>
     </View>
   );
 }

@@ -140,19 +140,30 @@ class GitHubQuery extends Component {
     return true;
   }
 
-  async queryIssues(repoUrl, pageNumber) {
+  async queryIssues(repoUrl, pageNumber, keys) {
     let uri = `https://api.github.com/repos/${repoUrl}/issues?state=open&sort=updated&direction=desc&page=${pageNumber}`;
     let pageId = `${repoUrl}#${pageNumber}`;
 
+    let storedValueKeyExists = false;
+    keys.forEach(key => {
+      if (key === pageId) {
+        console.log(`Cache should exist for ${pageId}`);
+        storedValueKeyExists = true;
+      }
+    });
+
     let storedValue = undefined;
-    try {
-      storedValue = await AsyncStorage.getItem(pageId);
-    } catch(e) {
+    if (storedValueKeyExists) {
+      try {
+        storedValue = await AsyncStorage.getItem(pageId);
+      } catch(e) {
+        console.log(`Failed to find cache value for ${pageId}`);
+      }
     }
 
     return new Promise((resolve, reject) => {
       try {
-        if (storedValue !== null) {
+        if (storedValue) {
           let storedJSONValue = JSON.parse(storedValue);
           console.info(`Found cached value for ${pageId}`);
 
@@ -227,6 +238,16 @@ class GitHubQuery extends Component {
       progress: 0.0,
     });
 
+    // What cache values might we already have?
+    let keys = [];
+    try {
+      keys = await AsyncStorage.getAllKeys();
+    } catch(e) {
+      console.log('Error getting cache keys');
+      console.log(e);
+    }
+    console.log(keys);
+
     let issues = [];
     let pagesCompleted = 0;
     let totalPages = 0;
@@ -288,7 +309,7 @@ class GitHubQuery extends Component {
     // (so we can display accurate progress)
     let firstPageData = [];
     for (let index = 0; index < this.state.repoUrls.length; index++) {
-      let firstPage = await this.queryFirstPage(this.state.repoUrls[index]);
+      let firstPage = await this.queryFirstPage(this.state.repoUrls[index], keys);
       firstPageData.push(firstPage);
       totalPages += firstPage.lastPageNumber;
     }
@@ -296,17 +317,22 @@ class GitHubQuery extends Component {
     // Once we have that data, go through it and actually add each page's payload to the list of issues
     for (let index = 0; index < this.state.repoUrls.length; index++) {
       let firstPage = firstPageData[index];
-      await this.queryAllPages(this.state.repoUrls[index], firstPage.lastPageNumber, firstPage.firstPageData, (pageData) => {
-        processPage(pageData);
-      });
+      await this.queryAllPages(
+        this.state.repoUrls[index],
+        firstPage.lastPageNumber,
+        firstPage.firstPageData,
+        keys,
+        (pageData) => {
+          processPage(pageData);
+        });
     }
   }
 
-  async queryFirstPage(repoUrl) {
+  async queryFirstPage(repoUrl, keys) {
     console.info(`Trying first page for ${repoUrl}`);
     let firstPageData = undefined;
     try {
-      firstPageData = await this.queryIssues(repoUrl, 1);
+      firstPageData = await this.queryIssues(repoUrl, 1, keys);
     } catch {
       console.log(`Error getting first page`);
       return {lastPageNumber: 0, firstPageData: {}};
@@ -321,7 +347,7 @@ class GitHubQuery extends Component {
     return {lastPageNumber, firstPageData};
   }
 
-  async queryAllPages(repoUrl, lastPageNumber, firstPageData, callback) {
+  async queryAllPages(repoUrl, lastPageNumber, firstPageData, keys, callback) {
     console.info(`Querying all pages for ${repoUrl}`);
 
     // We already have the data for the first page
@@ -330,7 +356,7 @@ class GitHubQuery extends Component {
     // Go fetch all the remaining pages in parallel
     for (let parallelPageNumber = 2; parallelPageNumber <= lastPageNumber; parallelPageNumber++) {
       console.info(`Querying page ${parallelPageNumber}/${lastPageNumber} for ${repoUrl}`);
-      this.queryIssues(repoUrl, parallelPageNumber).then((result) => {
+      this.queryIssues(repoUrl, parallelPageNumber, keys).then((result) => {
         callback(result);
       });
     }
@@ -356,6 +382,9 @@ class GitHubQuery extends Component {
               this.setState({
                 repoUrls: urls,
               }, () => this.queryAllIssues());
+            }}
+            refreshQuery={() => {
+              this.queryAllIssues();
             }}/>
           }/>
         {(this.state.progress < 1.0) &&
