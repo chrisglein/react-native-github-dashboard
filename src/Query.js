@@ -27,6 +27,15 @@ class GitHubQuery extends Component {
     };
   }
 
+  getDateSuffix() {
+    let currentDate = new Date();
+    // With date with hour in the key this means we would requery once/hour.
+    // By changing that result we can update less (e.g. twice/hour)
+    let hoursBetweenUpdates = 2;
+    let quantizedHours = (Math.ceil(currentDate.getHours() / hoursBetweenUpdates) * hoursBetweenUpdates);
+    return `${currentDate.getMonth()}-${currentDate.getDate()}-${currentDate.getFullYear()}--${quantizedHours}}}`; /* Remove }} */
+  }
+
   processIssue(issue) {
     let issueAssignee = issue.assignee;
     let assignee = 'unassigned';
@@ -142,8 +151,15 @@ class GitHubQuery extends Component {
 
   async queryIssues(repoUrl, pageNumber, keys) {
     let uri = `https://api.github.com/repos/${repoUrl}/issues?state=open&sort=updated&direction=desc&page=${pageNumber}`;
-    let pageId = `${repoUrl}#${pageNumber}`;
+    let pageId = `${repoUrl}#${pageNumber}\@${this.getDateSuffix()}`;
+    console.log(pageId);
 
+    // Issue #71: See how many cached entries should exist
+    // Load the previous one only (delete any older)
+    // But only treat the current date as real
+    // Use the previous data to know when an issue is
+    // - new (doesn't appear in older data set)
+    // - gone (only appears in older data set)
     let storedValueKeyExists = false;
     keys.forEach(key => {
       if (key === pageId) {
@@ -246,7 +262,34 @@ class GitHubQuery extends Component {
       console.log('Error getting cache keys');
       console.log(e);
     }
+    console.log("Keys");
     console.log(keys);
+
+    // Get all the different date entries for the same page
+    let keysByDate = keys.reduce((keysByDate, key) => {
+      let regex = new RegExp("(.+)\@(.+--.+)");
+      let matches = key.match(regex);
+      if (matches) {
+        let mainKey = matches[1];
+        let date = matches[2];
+
+        let existing = keysByDate[mainKey];
+        if (!existing) {
+          existing = [];
+        }
+
+        keysByDate[mainKey] = [date, ...existing];
+      } else {
+        let existing = keysByDate[key];
+        if (!existing) {
+          existing = [];
+        }
+        keysByDate[key] = [this.getDateSuffix(), ...existing];
+      }
+      return keysByDate;
+    }, {});
+    console.log("Keys by date");
+    console.log(keysByDate);
 
     let issues = [];
     let pagesCompleted = 0;
@@ -333,8 +376,9 @@ class GitHubQuery extends Component {
     let firstPageData = undefined;
     try {
       firstPageData = await this.queryIssues(repoUrl, 1, keys);
-    } catch {
+    } catch(e) {
       console.log(`Error getting first page`);
+      console.log(e);
       return {lastPageNumber: 0, firstPageData: {}};
     }
 
