@@ -27,6 +27,15 @@ class GitHubQuery extends Component {
     };
   }
 
+  getDateSuffix() {
+    let currentDate = new Date();
+    // With date with hour in the key this means we would requery once/hour.
+    // By changing that result we can update less (e.g. twice/hour)
+    let hoursBetweenUpdates = 2;
+    let quantizedHours = (Math.ceil(currentDate.getHours() / hoursBetweenUpdates) * hoursBetweenUpdates);
+    return `${currentDate.getMonth()}-${currentDate.getDate()}-${currentDate.getFullYear()}--${quantizedHours}}}`; /* Remove }} */
+  }
+
   processIssue(issue) {
     let issueAssignee = issue.assignee;
     let assignee = 'unassigned';
@@ -140,19 +149,37 @@ class GitHubQuery extends Component {
     return true;
   }
 
-  async queryIssues(repoUrl, pageNumber) {
+  async queryIssues(repoUrl, pageNumber, keys) {
     let uri = `https://api.github.com/repos/${repoUrl}/issues?state=open&sort=updated&direction=desc&page=${pageNumber}`;
-    let pageId = `${repoUrl}#${pageNumber}`;
+    let pageId = `${repoUrl}#${pageNumber}\@${this.getDateSuffix()}`;
+    console.log(pageId);
+
+    // Issue #71: See how many cached entries should exist
+    // Load the previous one only (delete any older)
+    // But only treat the current date as real
+    // Use the previous data to know when an issue is
+    // - new (doesn't appear in older data set)
+    // - gone (only appears in older data set)
+    let storedValueKeyExists = false;
+    keys.forEach(key => {
+      if (key === pageId) {
+        console.log(`Cache should exist for ${pageId}`);
+        storedValueKeyExists = true;
+      }
+    });
 
     let storedValue = undefined;
-    try {
-      storedValue = await AsyncStorage.getItem(pageId);
-    } catch(e) {
+    if (storedValueKeyExists) {
+      try {
+        storedValue = await AsyncStorage.getItem(pageId);
+      } catch(e) {
+        console.log(`Failed to find cache value for ${pageId}`);
+      }
     }
 
     return new Promise((resolve, reject) => {
       try {
-        if (storedValue !== null) {
+        if (storedValue) {
           let storedJSONValue = JSON.parse(storedValue);
           console.info(`Found cached value for ${pageId}`);
 
@@ -227,6 +254,43 @@ class GitHubQuery extends Component {
       progress: 0.0,
     });
 
+    // What cache values might we already have?
+    let keys = [];
+    try {
+      keys = await AsyncStorage.getAllKeys();
+    } catch(e) {
+      console.log('Error getting cache keys');
+      console.log(e);
+    }
+    console.log("Keys");
+    console.log(keys);
+
+    // Get all the different date entries for the same page
+    let keysByDate = keys.reduce((keysByDate, key) => {
+      let regex = new RegExp("(.+)\@(.+--.+)");
+      let matches = key.match(regex);
+      if (matches) {
+        let mainKey = matches[1];
+        let date = matches[2];
+
+        let existing = keysByDate[mainKey];
+        if (!existing) {
+          existing = [];
+        }
+
+        keysByDate[mainKey] = [date, ...existing];
+      } else {
+        let existing = keysByDate[key];
+        if (!existing) {
+          existing = [];
+        }
+        keysByDate[key] = [this.getDateSuffix(), ...existing];
+      }
+      return keysByDate;
+    }, {});
+    console.log("Keys by date");
+    console.log(keysByDate);
+
     let issues = [];
     let pagesCompleted = 0;
     let totalPages = 0;
@@ -288,7 +352,7 @@ class GitHubQuery extends Component {
     // (so we can display accurate progress)
     let firstPageData = [];
     for (let index = 0; index < this.state.repoUrls.length; index++) {
-      let firstPage = await this.queryFirstPage(this.state.repoUrls[index]);
+      let firstPage = await this.queryFirstPage(this.state.repoUrls[index], keys);
       firstPageData.push(firstPage);
       totalPages += firstPage.lastPageNumber;
     }
@@ -296,19 +360,25 @@ class GitHubQuery extends Component {
     // Once we have that data, go through it and actually add each page's payload to the list of issues
     for (let index = 0; index < this.state.repoUrls.length; index++) {
       let firstPage = firstPageData[index];
-      await this.queryAllPages(this.state.repoUrls[index], firstPage.lastPageNumber, firstPage.firstPageData, (pageData) => {
-        processPage(pageData);
-      });
+      await this.queryAllPages(
+        this.state.repoUrls[index],
+        firstPage.lastPageNumber,
+        firstPage.firstPageData,
+        keys,
+        (pageData) => {
+          processPage(pageData);
+        });
     }
   }
 
-  async queryFirstPage(repoUrl) {
+  async queryFirstPage(repoUrl, keys) {
     console.info(`Trying first page for ${repoUrl}`);
     let firstPageData = undefined;
     try {
-      firstPageData = await this.queryIssues(repoUrl, 1);
-    } catch {
+      firstPageData = await this.queryIssues(repoUrl, 1, keys);
+    } catch(e) {
       console.log(`Error getting first page`);
+      console.log(e);
       return {lastPageNumber: 0, firstPageData: {}};
     }
 
@@ -321,7 +391,7 @@ class GitHubQuery extends Component {
     return {lastPageNumber, firstPageData};
   }
 
-  async queryAllPages(repoUrl, lastPageNumber, firstPageData, callback) {
+  async queryAllPages(repoUrl, lastPageNumber, firstPageData, keys, callback) {
     console.info(`Querying all pages for ${repoUrl}`);
 
     // We already have the data for the first page
@@ -330,7 +400,7 @@ class GitHubQuery extends Component {
     // Go fetch all the remaining pages in parallel
     for (let parallelPageNumber = 2; parallelPageNumber <= lastPageNumber; parallelPageNumber++) {
       console.info(`Querying page ${parallelPageNumber}/${lastPageNumber} for ${repoUrl}`);
-      this.queryIssues(repoUrl, parallelPageNumber).then((result) => {
+      this.queryIssues(repoUrl, parallelPageNumber, keys).then((result) => {
         callback(result);
       });
     }
@@ -356,6 +426,9 @@ class GitHubQuery extends Component {
               this.setState({
                 repoUrls: urls,
               }, () => this.queryAllIssues());
+            }}
+            refreshQuery={() => {
+              this.queryAllIssues();
             }}/>
           }/>
         {(this.state.progress < 1.0) &&
