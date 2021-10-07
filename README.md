@@ -12,9 +12,14 @@ A React Native application for querying GitHub issues:
   - by Milestone
 - Act on content: Issues when clicked will launch the GitHub webpage for that issue.
 
+# Try it out
+
+You can load it from the browser [here](https://chrisglein.github.io/github-dashboard/).
+
+The Windows desktop app loads a very similar experience as a native app. Eventually that [will be published to the Microsoft Store](https://github.com/chrisglein/react-native-github-dashboard/issues/51), but in the meantime you can only run it by cloning the repo.
 ![Screenshot of application](images/Screenshot.png)
 
-# How to run
+## How to run
 
 ### Windows
 ```
