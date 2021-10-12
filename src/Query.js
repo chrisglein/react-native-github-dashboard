@@ -3,6 +3,8 @@ import {
   View,
   ActivityIndicator,
   StyleSheet,
+  Switch,
+  Text,
 } from 'react-native';
 
 import { RepoUrls } from './RepoUrl'
@@ -22,18 +24,27 @@ class GitHubQuery extends Component {
         'microsoft/react-native-windows-samples',
         'microsoft/react-native-gallery',
         'microsoft/react-native-dualscreen',
+        'microsoft/react-native-xaml',
       ],
+      settings: {
+        showLabels: true,
+        collapseUnassigned: props.queryParams.issueType !== 'pull_request',
+      },
       issues: [],
     };
   }
 
   getDateSuffix() {
     let currentDate = new Date();
+    currentDate.setMinutes(0);
+    currentDate.setMilliseconds(0);
+
     // With date with hour in the key this means we would requery once/hour.
     // By changing that result we can update less (e.g. twice/hour)
     let hoursBetweenUpdates = 2;
     let quantizedHours = (Math.ceil(currentDate.getHours() / hoursBetweenUpdates) * hoursBetweenUpdates);
-    return `${currentDate.getMonth()}-${currentDate.getDate()}-${currentDate.getFullYear()}--${quantizedHours}}}`; /* Remove }} */
+    // Note: Months are 0-based (0==January, which is confusing when read in the logs)
+    return `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}--${quantizedHours}`;
   }
 
   processIssue(issue) {
@@ -54,7 +65,7 @@ class GitHubQuery extends Component {
     } else {
       milestone.id = 0;
       milestone.title = 'unscheduled';
-      milestone.dueDate = new Date(-8640000000000000);
+      milestone.dueDate = new Date(8640000000000000);
     }
     let labels = issue.labels.map(value => {
       return {
@@ -149,9 +160,11 @@ class GitHubQuery extends Component {
     return true;
   }
 
-  async queryIssues(repoUrl, pageNumber, keys) {
+  async queryIssues(repoUrl, pageNumber, keysByDate) {
     let uri = `https://api.github.com/repos/${repoUrl}/issues?state=open&sort=updated&direction=desc&page=${pageNumber}`;
-    let pageId = `${repoUrl}#${pageNumber}\@${this.getDateSuffix()}`;
+    let pageIdWithoutDate = `${repoUrl}#${pageNumber}`;
+    let idealDateKey = this.getDateSuffix();
+    let pageId = `${pageIdWithoutDate}\@${idealDateKey}`;
     console.log(pageId);
 
     // Issue #71: See how many cached entries should exist
@@ -160,16 +173,26 @@ class GitHubQuery extends Component {
     // Use the previous data to know when an issue is
     // - new (doesn't appear in older data set)
     // - gone (only appears in older data set)
-    let storedValueKeyExists = false;
-    keys.forEach(key => {
-      if (key === pageId) {
-        console.log(`Cache should exist for ${pageId}`);
-        storedValueKeyExists = true;
+    let storedValueKeyExists = undefined;
+    let keys = keysByDate[pageIdWithoutDate];
+    if (keys) {
+      keys.forEach(key => {
+        if (key === idealDateKey) {
+          console.log(`Cache should exist for ${pageId} at ${idealDateKey}`);
+          storedValueKeyExists = idealDateKey;
+        }
+      });
+      if (!storedValueKeyExists) {
+        console.log(`Cached values found, but not recent enough as ${idealDateKey}`);
+        // offline
+        // NOTE: If this is the first page this is okay, but all other pages should fallback so queries don't mix :/
+        storedValueKeyExists = keys[0];
       }
-    });
+    }
 
     let storedValue = undefined;
     if (storedValueKeyExists) {
+      pageId = `${pageIdWithoutDate}\@${storedValueKeyExists}`;
       try {
         storedValue = await AsyncStorage.getItem(pageId);
       } catch(e) {
@@ -280,6 +303,7 @@ class GitHubQuery extends Component {
 
         keysByDate[mainKey] = [date, ...existing];
       } else {
+        console.warn(`Key did not match date format: '${key}'`);
         let existing = keysByDate[key];
         if (!existing) {
           existing = [];
@@ -352,7 +376,7 @@ class GitHubQuery extends Component {
     // (so we can display accurate progress)
     let firstPageData = [];
     for (let index = 0; index < this.state.repoUrls.length; index++) {
-      let firstPage = await this.queryFirstPage(this.state.repoUrls[index], keys);
+      let firstPage = await this.queryFirstPage(this.state.repoUrls[index], keysByDate);
       firstPageData.push(firstPage);
       totalPages += firstPage.lastPageNumber;
     }
@@ -364,18 +388,18 @@ class GitHubQuery extends Component {
         this.state.repoUrls[index],
         firstPage.lastPageNumber,
         firstPage.firstPageData,
-        keys,
+        keysByDate,
         (pageData) => {
           processPage(pageData);
         });
     }
   }
 
-  async queryFirstPage(repoUrl, keys) {
+  async queryFirstPage(repoUrl, keysByDate) {
     console.info(`Trying first page for ${repoUrl}`);
     let firstPageData = undefined;
     try {
-      firstPageData = await this.queryIssues(repoUrl, 1, keys);
+      firstPageData = await this.queryIssues(repoUrl, 1, keysByDate);
     } catch(e) {
       console.log(`Error getting first page`);
       console.log(e);
@@ -391,7 +415,7 @@ class GitHubQuery extends Component {
     return {lastPageNumber, firstPageData};
   }
 
-  async queryAllPages(repoUrl, lastPageNumber, firstPageData, keys, callback) {
+  async queryAllPages(repoUrl, lastPageNumber, firstPageData, keysByDate, callback) {
     console.info(`Querying all pages for ${repoUrl}`);
 
     // We already have the data for the first page
@@ -400,7 +424,7 @@ class GitHubQuery extends Component {
     // Go fetch all the remaining pages in parallel
     for (let parallelPageNumber = 2; parallelPageNumber <= lastPageNumber; parallelPageNumber++) {
       console.info(`Querying page ${parallelPageNumber}/${lastPageNumber} for ${repoUrl}`);
-      this.queryIssues(repoUrl, parallelPageNumber, keys).then((result) => {
+      this.queryIssues(repoUrl, parallelPageNumber, keysByDate).then((result) => {
         callback(result);
       });
     }
@@ -416,20 +440,42 @@ class GitHubQuery extends Component {
         <Page
           issues={this.state.issues}
           queryParams={this.props.queryParams}
+          settings={this.state.settings}
           settingsUI={
-            <RepoUrls
-            urls={this.state.repoUrls}
-            clearCache={() => {
-              this.clearCache();
-            }}
-            onUrlsChanged={urls => {
-              this.setState({
-                repoUrls: urls,
-              }, () => this.queryAllIssues());
-            }}
-            refreshQuery={() => {
-              this.queryAllIssues();
-            }}/>
+            <View>
+              <RepoUrls
+                urls={this.state.repoUrls}
+                clearCache={() => {
+                  this.clearCache();
+                }}
+                onUrlsChanged={urls => {
+                  this.setState({
+                    repoUrls: urls,
+                  }, () => this.queryAllIssues());
+                }}
+                refreshQuery={() => {
+                  this.queryAllIssues();
+                }}/>
+                <View style={{flexDirection: 'row'}}>
+                  <Switch
+                    value={this.state.settings.showLabels}
+                    onValueChange={newValue => {
+                      let newSettings = {...this.state.settings, ...{showLabels: newValue}};
+                      this.setState({settings: newSettings});
+                      }}/>
+                  <Text>Show labels on issues?</Text>
+                </View>
+                <View style={{flexDirection: 'row'}}>
+                  <Switch
+                    value={this.state.settings.collapseUnassigned}
+                    onValueChange={newValue => {
+                      let newSettings = {...this.state.settings, ...{collapseUnassigned: newValue}};
+                      this.setState({settings: newSettings});
+                      }}/>
+                  <Text>Default collapse unassigned groups?</Text>
+                </View>
+            </View>
+            
           }/>
         {(this.state.progress < 1.0) &&
           <View style={styles.loading}>

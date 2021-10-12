@@ -14,9 +14,7 @@ import {
 } from './Label'
 
 const Issue = (props) => {
-  // TODO: Enable option to not display extra label goop
-  let showLabels = true;
-  if (showLabels) {
+  if (props.settings.showLabels) {
     return (
       <View style={styles.issue}>
         <TouchableHighlight
@@ -51,7 +49,7 @@ class IssueList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      collapsed: props.assignee === 'unassigned',
+      collapsed: props.settings.collapseUnassigned && props.assignee === 'unassigned',
     }
   }
 
@@ -88,7 +86,16 @@ class IssueList extends Component {
           aria-level="2" 
           onPress={() => {this.setState({collapsed: !this.state.collapsed})}}>
           <View style={styles.assignee}>
-            <Text style={styles.assigneeIcon}>&#xE77B;</Text>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                let date = new Date();
+                let to = this.props.assignee;
+                let subject = `Your Assigned Issues ${date.getMonth()+1}-${date.getDate()}-${date.getFullYear().toString().slice(-2)}`;
+                let body = "Here are your currently assigned issues.";
+                Linking.openURL(`mailto:${to}?subject=${subject}&body=${body}`);
+              }}>
+              <Text style={styles.assigneeIcon}>&#xE715;</Text>
+            </TouchableWithoutFeedback>
             <Text
               style={styles.assigneeName}>
               {this.props.assignee}
@@ -114,7 +121,7 @@ class IssueList extends Component {
               style={styles.milestoneSectionHeader}>{section.milestone.title}
             </Text>}
           renderItem={({item}) =>
-            <Issue item={item}/>
+            <Issue item={item} settings={this.props.settings}/>
           }
           renderSectionFooter={() =>
             <View style={styles.milestoneSectionSeparator}/>
