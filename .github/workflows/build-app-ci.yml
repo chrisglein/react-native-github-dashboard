@@ -7,7 +7,7 @@ name: App CI
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   # This job builds and deploys both Debug and Release versions of the app,
