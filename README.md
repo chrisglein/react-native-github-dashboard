@@ -18,6 +18,7 @@ You can load it from the browser [here](https://chrisglein.github.io/github-dash
 
 - [View PRs across multiple repos](https://chrisglein.github.io/github-dashboard/?issueType=pull_request)
 - [View assigned issues across multiple repos](https://chrisglein.github.io/github-dashboard/?assignee=chrisglein)
+- [View issues in a milestone shared across multiple repos](https://chrisglein.github.io/github-dashboard/?milestone=0.67)
 
 ## Desktop
 The Windows desktop app loads a very similar experience as a native app. Eventually that [will be published to the Microsoft Store](https://github.com/chrisglein/react-native-github-dashboard/issues/51), but in the meantime you can only run it by cloning the repo.
