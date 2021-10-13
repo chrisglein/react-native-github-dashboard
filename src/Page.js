@@ -14,7 +14,8 @@ const IssuessByAssigneeList = (props) => {
       key={assignee}
       assignee={assignee}
       list={props.issuesByAssignee[assignee]}
-    />
+      settings={props.settings}
+      />
   ));
 }
 
@@ -236,7 +237,8 @@ class Page extends Component {
         <IssuessByAssigneeList
           assignees={assigneesWithIssues}
           issuesByAssignee={issuesByAssignee}
-          requiredLabels={this.state.requiredLabels}/>
+          requiredLabels={this.state.requiredLabels}
+          settings={this.props.settings}/>
       </>
     );
   }

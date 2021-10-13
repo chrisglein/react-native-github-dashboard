@@ -28,6 +28,9 @@ const useInitialURL = () => {
 };
 
 const getQueryParam = (url, param) => {
+  if (!url) {
+    return undefined;
+  }
   var regex = new RegExp("[?&]" + param + "=([^&]+).*$");
   var match = url.match(regex);
   return match === null ? undefined : decodeURIComponent(match[1].replace(/\+/g, " "));
