@@ -203,7 +203,7 @@ class GitHubQuery extends Component {
         }
       });
       if (!storedValueKeyExists) {
-        let mostRecentKey = ${keys[0]};
+        let mostRecentKey = keys[0];
         console.log(`Cached values found as ${mostRecentKey}, but not recent enough as ${idealDateKey}`);
         // Disabling this until logic is built to save old state separately
         // NOTE: If this is the first page this is okay, but all other pages should fallback so queries don't mix :/
