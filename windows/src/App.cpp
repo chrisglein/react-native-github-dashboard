@@ -5,15 +5,14 @@
 #include "AutolinkedNativeModules.g.h"
 #include "ReactPackageProvider.h"
 
-
-using namespace winrt::src;
-using namespace winrt::src::implementation;
 using namespace winrt;
-using namespace Windows::UI::Xaml;
-using namespace Windows::UI::Xaml::Controls;
-using namespace Windows::UI::Xaml::Navigation;
-using namespace Windows::ApplicationModel;
+using namespace xaml;
+using namespace xaml::Controls;
+using namespace xaml::Navigation;
 
+using namespace Windows::ApplicationModel;
+namespace winrt::src::implementation
+{
 /// <summary>
 /// Initializes the singleton application object.  This is the first line of
 /// authored code executed, and as such is the logical equivalent of main() or
@@ -26,7 +25,7 @@ App::App() noexcept
     InstanceSettings().UseWebDebugger(false);
     InstanceSettings().UseFastRefresh(false);
 #else
-    JavaScriptMainModuleName(L"index");
+    JavaScriptBundleFile(L"index");
     InstanceSettings().UseWebDebugger(true);
     InstanceSettings().UseFastRefresh(true);
 #endif
@@ -42,7 +41,7 @@ App::App() noexcept
     PackageProviders().Append(make<ReactPackageProvider>()); // Includes all modules in this project
 
     PackageProviders().Append(winrt::ReactNativeAsyncStorage::ReactPackageProvider());
-
+    
     InitializeComponent();
 }
 
@@ -56,7 +55,19 @@ void App::OnLaunched(activation::LaunchActivatedEventArgs const& e)
     super::OnLaunched(e);
 
     Frame rootFrame = Window::Current().Content().as<Frame>();
-    rootFrame.Navigate(xaml_typename<src::MainPage>(), box_value(e.Arguments()));
+    rootFrame.Navigate(xaml_typename<MainPage>(), box_value(e.Arguments()));
+}
+
+/// <summary>
+/// Invoked when the application is activated by some means other than normal launching.
+/// </summary>
+void App::OnActivated(Activation::IActivatedEventArgs const &e) {
+  auto preActivationContent = Window::Current().Content();
+  super::OnActivated(e);
+  if (!preActivationContent && Window::Current()) {
+    Frame rootFrame = Window::Current().Content().as<Frame>();
+    rootFrame.Navigate(xaml_typename<MainPage>(), nullptr);
+  }
 }
 
 /// <summary>
@@ -80,3 +91,5 @@ void App::OnNavigationFailed(IInspectable const&, NavigationFailedEventArgs cons
 {
     throw hresult_error(E_FAIL, hstring(L"Failed to load Page ") + e.SourcePageType().Name);
 }
+
+} // namespace winrt::src::implementation

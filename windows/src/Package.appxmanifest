@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="40ae1a44-01ef-4456-962f-396d0ee94c16"
+    Name="3fed744b-9b2b-401e-acce-bf1673f11942"
     Publisher="CN=cglein"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="40ae1a44-01ef-4456-962f-396d0ee94c16" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="3fed744b-9b2b-401e-acce-bf1673f11942" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>github dashboard</DisplayName>
