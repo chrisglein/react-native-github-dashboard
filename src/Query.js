@@ -47,6 +47,21 @@ class GitHubQuery extends Component {
     return `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}--${quantizedHours}`;
   }
 
+  // Only bring over the values from the json that we care about, otherwise we
+  // will very quickly hit the cache limits for how much a web page can store.
+  trimPageData(pageData) {
+    let newPageData = pageData.map(issue => {
+      return Object.keys(issue).reduce((newIssue, key) => {
+        const knownKeys = ['assignee', 'html_url', 'id', 'labels', 'milestone', 'number', 'pull_request', 'title', 'url'];
+        if (knownKeys.includes(key)) {
+          newIssue[key] = issue[key];
+        }
+        return newIssue;
+      }, {});
+    });
+    return newPageData;
+  }
+
   processIssue(issue) {
     let issueAssignee = issue.assignee;
     let assignee = 'unassigned';
@@ -109,19 +124,14 @@ class GitHubQuery extends Component {
   }
 
   async clearCache() {
+    let ableToClearIndividually = true;
     let keys = [];
     try {
       keys = await AsyncStorage.getAllKeys();
     } catch(e) {
       console.log('Error getting cache keys');
       console.log(e);
-
-      try {
-        await AsyncStorage.clear();
-      } catch(e) {
-        console.log('Error clearing all cache');
-        console.log(e);
-      }
+      ableToClearIndividually = false;
     }
 
     keys.forEach(async (key) => {
@@ -131,8 +141,18 @@ class GitHubQuery extends Component {
       } catch(e) {
         console.log(`Error removing ${key}`);
         console.log(e);
+        ableToClearIndividually = false;
       }
     });
+
+    if (!ableToClearIndividually) {
+      try {
+        await AsyncStorage.clear();
+      } catch(e) {
+        console.log('Error clearing all cache');
+        console.log(e);
+      }
+    }
 
     await this.queryAllIssues();
   }
@@ -183,10 +203,11 @@ class GitHubQuery extends Component {
         }
       });
       if (!storedValueKeyExists) {
-        console.log(`Cached values found, but not recent enough as ${idealDateKey}`);
-        // offline
+        let mostRecentKey = ${keys[0]};
+        console.log(`Cached values found as ${mostRecentKey}, but not recent enough as ${idealDateKey}`);
+        // Disabling this until logic is built to save old state separately
         // NOTE: If this is the first page this is okay, but all other pages should fallback so queries don't mix :/
-        storedValueKeyExists = keys[0];
+        //storedValueKeyExists = mostRecentKey;
       }
     }
 
@@ -233,6 +254,9 @@ class GitHubQuery extends Component {
           reject();
           return;
         }
+
+        // Trim down the data so we don't need to save off as much
+        parsedData = this.trimPageData(parsedData);
 
         let pageData = {
           data: parsedData,
