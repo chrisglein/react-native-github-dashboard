@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="3fed744b-9b2b-401e-acce-bf1673f11942"
+    Name="ff794bca-3f03-48c5-a5e2-aa5d0fde75ab"
     Publisher="CN=cglein"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="3fed744b-9b2b-401e-acce-bf1673f11942" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="ff794bca-3f03-48c5-a5e2-aa5d0fde75ab" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>github dashboard</DisplayName>
@@ -31,7 +31,7 @@
     <Application
       Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="src.App">
+      EntryPoint="githubdashboard.App">
       <uap:VisualElements
         DisplayName="github dashboard"
         Square150x150Logo="Assets\Square150x150Logo.png"

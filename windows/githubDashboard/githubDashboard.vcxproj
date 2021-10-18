@@ -6,16 +6,16 @@
     <CppWinRTOptimized>true</CppWinRTOptimized>
     <CppWinRTRootNamespaceAutoMerge>true</CppWinRTRootNamespaceAutoMerge>
     <MinimalCoreWin>true</MinimalCoreWin>
-    <ProjectGuid>{b40b6c70-5c40-4640-8d8a-cc7dc0c8e1f0}</ProjectGuid>
-    <ProjectName>src</ProjectName>
-    <RootNamespace>src</RootNamespace>
+    <ProjectGuid>{f37429ed-edf4-4471-98f3-c3d00ca38570}</ProjectGuid>
+    <ProjectName>githubdashboard</ProjectName>
+    <RootNamespace>githubdashboard</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
     <AppContainerApplication>true</AppContainerApplication>
     <ApplicationType>Windows Store</ApplicationType>
     <ApplicationTypeRevision>10.0</ApplicationTypeRevision>
-    <PackageCertificateKeyFile>src_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>DBED60D307A6D15200E525A5E2A360FFB87280FE</PackageCertificateThumbprint>
+    <PackageCertificateKeyFile>githubdashboard_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateThumbprint>B70AEC7909A0DD20F404C97B7DE20130916337D7</PackageCertificateThumbprint>
     <PackageCertificatePassword>password</PackageCertificatePassword>
   </PropertyGroup>
   <PropertyGroup Label="ReactNativeWindowsProps">

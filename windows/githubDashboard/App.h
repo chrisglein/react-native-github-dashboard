@@ -10,7 +10,7 @@ namespace activation = winrt::Microsoft::UI::Xaml;
 namespace activation = winrt::Windows::ApplicationModel::Activation;
 #endif
 
-namespace winrt::src::implementation
+namespace winrt::githubdashboard::implementation
 {
     struct App : AppT<App>
     {
@@ -22,4 +22,4 @@ namespace winrt::src::implementation
       private:
         using super = AppT<App>;
     };
-} // namespace winrt::src::implementation
+} // namespace winrt::githubdashboard::implementation
