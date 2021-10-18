@@ -6,10 +6,8 @@
 
 #include "App.h"
 
-
-
 using namespace winrt;
-using namespace Windows::UI::Xaml;
+using namespace xaml;
 
 namespace winrt::src::implementation
 {
@@ -20,5 +18,3 @@ namespace winrt::src::implementation
         ReactRootView().ReactNativeHost(app->Host());
     }
 }
-
-
