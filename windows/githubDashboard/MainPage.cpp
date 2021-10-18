@@ -9,7 +9,7 @@
 using namespace winrt;
 using namespace xaml;
 
-namespace winrt::src::implementation
+namespace winrt::githubdashboard::implementation
 {
     MainPage::MainPage()
     {
