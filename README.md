@@ -1,4 +1,4 @@
-# react-native-github-dashboard
+# GitHub Dashboard
 
 A React Native application for querying GitHub issues:
 - Combine issues from multiple repos
