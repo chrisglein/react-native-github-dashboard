@@ -14,6 +14,8 @@ A React Native application for querying GitHub issues:
 
 # Try it out
 
+## Browser
+
 You can load it from the browser [here](https://chrisglein.github.io/github-dashboard/).
 
 - [View PRs across multiple repos](https://chrisglein.github.io/github-dashboard/?issueType=pull_request)
@@ -21,10 +23,13 @@ You can load it from the browser [here](https://chrisglein.github.io/github-dash
 - [View issues in a milestone shared across multiple repos](https://chrisglein.github.io/github-dashboard/?milestone=0.67)
 
 ## Desktop
-The Windows desktop app loads a very similar experience as a native app. Eventually that [will be published to the Microsoft Store](https://github.com/chrisglein/react-native-github-dashboard/issues/51), but in the meantime you can only run it by cloning the repo.
-![Screenshot of application](images/Screenshot.png)
+The Windows desktop app loads a very similar experience as a native app. [Download from the Windows Store](https://www.microsoft.com/store/apps/9PP3T2LFQV37) (Work in progress, issues tracked [here](https://github.com/chrisglein/react-native-github-dashboard/issues/51).
+
+<img width="640" src="images/Screenshot.png" alt="Screenshot of application"/>
 
 # How to run
+
+Instructions for how to run after cloning the repo:
 
 ### Windows
 ```
