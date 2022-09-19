@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "githubDashboard.app"
-               BlueprintName = "githubDashboard"
-               ReferencedContainer = "container:githubDashboard.xcodeproj">
+               BuildableName = "githubdashboard.app"
+               BlueprintName = "githubdashboard"
+               ReferencedContainer = "container:githubdashboard.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "githubDashboardTests.xctest"
-               BlueprintName = "githubDashboardTests"
-               ReferencedContainer = "container:githubDashboard.xcodeproj">
+               BuildableName = "githubdashboardTests.xctest"
+               BlueprintName = "githubdashboardTests"
+               ReferencedContainer = "container:githubdashboard.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "githubDashboard.app"
-            BlueprintName = "githubDashboard"
-            ReferencedContainer = "container:githubDashboard.xcodeproj">
+            BuildableName = "githubdashboard.app"
+            BlueprintName = "githubdashboard"
+            ReferencedContainer = "container:githubdashboard.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "githubDashboard.app"
-            BlueprintName = "githubDashboard"
-            ReferencedContainer = "container:githubDashboard.xcodeproj">
+            BuildableName = "githubdashboard.app"
+            BlueprintName = "githubdashboard"
+            ReferencedContainer = "container:githubdashboard.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
